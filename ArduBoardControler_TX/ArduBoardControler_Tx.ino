@@ -28,21 +28,27 @@
 #include "Config.h"
 #include "nRF24L01.h"
 #include "RF24.h"
+
 #ifdef OLED_USED
-#include "U8glib.h"  
+//#include "U8glib.h"
+#include "U8g2lib.h"
+//#include "Ucglib.h"
 #endif // OLED_USED
+
 #include "datatypes.h"
 #include "local_datatypes.h"
+
 #ifdef DEBUG
 #include "VescUart.h" //SerialPrint for received Data Package
 #endif
+
 #ifdef STATUS_LED_USED
 #include <Adafruit_NeoPixel.h>
 #include "WS2812Color.h"
 #endif //STATUS_LED_USED
+
 #include "printf.h"
 #include "LiPoCheck.h"
-
 
 //
 // Hardware configuration

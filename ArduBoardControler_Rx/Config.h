@@ -15,7 +15,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-
 */
 
 //Config RX
@@ -32,14 +31,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 //#define DEBUG
 
 // Definition of Pipe
- 
 const uint64_t pipe = 0xE8E8F0F0E1LL;
 
 //**for Mega2560
 #ifdef __AVR_ATmega2560__
 
 //Pin definition
-
 #define CEPIN	9
 #define CSPIN	10
 
@@ -47,17 +44,15 @@ const uint64_t pipe = 0xE8E8F0F0E1LL;
 #define SERIALIO Serial1
 #define DEBUGSERIAL Serial
 
-
-
-#endif
+#endif //__AVR_ATmega2560__
 
 //**for Arduino Nano
-
 #ifdef ARDUINO_AVR_NANO
 
 //Pin definition
 
 //nRF24: 
+
 /*nRF24	>	Ardunio nano
 ------------------------
 VCC		>	3.3 V
@@ -66,8 +61,10 @@ MOSI	>	11
 MISO	>	12
 SCK		>	13
 IRQ		>	not connected*/
+
 #define CEPIN	9
 #define CSPIN	10
+
 /*VESC UART
 VESC		Arduino Nano
 VCC		>	5V			(black wire)	
@@ -75,38 +72,31 @@ GND		>	GND			(white wire)
 TX		>	RX			(orange wire)
 RX		>	TX			(green wire)
 */
+
 //Definition of Serial ports
 #define SERIALIO Serial
 #define DEBUGSERIAL Serial
-#endif
+
+#endif // ARDUINO_AVR_NANO
 
 //Settings for Nunchuk control
-
 #define SET_NUNCHUK_CONTROL
 
-
 //Setting for current control
-
 //#define SET_CURRENT_CONTROL
 
 #define DEADBAND_POS 1
 #define DEADBAND_NEG -1
 
 //Settings for remote
-
 #define TIMEOUTMAX	500
 
 ////Define remote Package
-//
 //struct remotePackage {
-//	
 //	int		valXJoy;
 //	int		valYJoy;
 //	boolean	valUpperButton;
 //	boolean	valLowerButton;
-//	
 //} ; >> moved to datatypes.h in lib VescUartControl
-#endif
 
-
-
+#endif // _CONFIG_h
