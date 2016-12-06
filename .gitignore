@@ -2,6 +2,7 @@
 *.ar
 *.mk
 *.ino.cpp
+*.sin
 /core/
 /libraries/
 
