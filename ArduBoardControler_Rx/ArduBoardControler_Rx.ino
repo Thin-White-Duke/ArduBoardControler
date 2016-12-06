@@ -38,7 +38,7 @@
 
 //Definition of radio class
 
-RF24 radio(CEPIN,CSPIN);
+RF24 radio(NRF_CE,NRF_CS);
 
 //Define variables for remote
 struct remotePackage remPack;

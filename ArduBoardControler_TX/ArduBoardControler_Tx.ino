@@ -20,35 +20,34 @@
 
  You should have received a copy of the GNU General Public License
  along with this program.If not, see <http://www.gnu.org/licenses/>.
-
  */
 #include <SPI.h>
 
-//Using the nRF34 library from https://github.com/TMRh20/RF24
 #include "Config.h"
-#include "nRF24L01.h"
+#include "datatypes.h"
+#include "local_datatypes.h"
+#include "LiPoCheck.h"
+
+#include "nRF24L01.h" // nRF24 library from https://github.com/TMRh20/RF24
 #include "RF24.h"
 
 #ifdef OLED_USED
-//#include "U8glib.h"
-#include "U8g2lib.h"
+#include "U8glib.h"
 //#include "Ucglib.h"
 #endif // OLED_USED
-
-#include "datatypes.h"
-#include "local_datatypes.h"
-
-#ifdef DEBUG
-#include "VescUart.h" //SerialPrint for received Data Package
-#endif
 
 #ifdef STATUS_LED_USED
 #include <Adafruit_NeoPixel.h>
 #include "WS2812Color.h"
 #endif //STATUS_LED_USED
 
-#include "printf.h"
-#include "LiPoCheck.h"
+#ifdef DEBUG
+//#include "VescUart.h" //SerialPrint for received Data Package
+#include "SerialPrint.h" //SerialPrint for received Data Package
+#endif
+
+//#include "printf.h" not used, instead try
+#define printf Serial.printf
 
 //
 // Hardware configuration
@@ -57,19 +56,19 @@
 
 #ifdef STATUS_LED_USED
 Adafruit_NeoPixel Led = Adafruit_NeoPixel(NUM2812, LED_PIN, NEO_GRB + NEO_KHZ800);
-#endif // STATUS_LEDS_USED
+#endif // STATUS_LED_USED
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
-RF24 radio(CEPIN,CSPIN);
+RF24 radio(NRF_CE,NRF_CS);
 
-//Setup OLED display
-
-//Please check the usage of the right constructor for your OLED driver in the u8glib. 
-//Here we use a SSD1306 with HW_SPI
+//OLED display
+//Check usage of the constructor for your OLED driver in the u8glib or other
 #ifdef OLED_USED
-U8GLIB_SSD1306_128X64 u8g(OLED_CSPIN, OLED_CEPIN, OLED_MISO, OLED_MOSI, OLED_SCK);
-//U8GLIB_SSD1306_128X64 u8g(SCL, SDA, CS, DC, RES);
+//U8GLIB_SSD1306_128X64 u8g(OLED_CS, OLED_DC, MISO, MOSI, SCK); // SSD1306 with HW_SPI
+U8GLIB_SSD1351_128X128_HICOLOR u8g(OLED_CS, OLED_DC, OLED_RST);
+//Ucglib_SSD1351_18x128x128_HWSPI ucg(OLED_DC, OLED_CS, OLED_RST);
+//Ucglib_SSD1351_18x128x128_SWSPI ucg(SCK, MOSI, OLED_DC, OLED_CS, OLED_RST);
 #endif // OLED_USED
 
 struct remotePackage remPack;

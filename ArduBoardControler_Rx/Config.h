@@ -79,6 +79,89 @@ RX		>	TX			(green wire)
 
 #endif // ARDUINO_AVR_NANO
 
+//** Teensy3.1
+#ifdef TEENSYDUINO
+
+// Serial Ports
+#define SERIALIO Serial1
+#define DEBUGSERIAL Serial
+
+/* nRF24 > Teensy3.1
+-----------------------
+VCC      >     3.3 V
+GND      >     GND
+MOSI     >     11
+MISO     >     12
+SCK      >     13
+IRQ      >     not connected*/
+
+// nRF24 SPI definition
+#define NRF_CE         9 //CEPIN
+#define NRF_CS        10 //CSPIN
+#define MOSI          11
+#define MISO          12
+#define SCK           13
+
+/*VESC UART
+VESC    Arduino Nano
+VCC   > 5V      (black wire)
+GND   > GND     (white wire)
+TX    > RX1      (orange wire)
+RX    > TX1      (green wire)
+*/
+
+#endif // TEENSYDUINO
+
+//Define voltage control setting
+#define LIPO
+#ifdef  LIPO
+#define MINVOLRANGE 3.3
+#define MAXVOLRANGE 4.25
+#define MAXNUMBERCELLS  10
+#endif
+
+// TX Voltage measurement
+#define VOLTAGE_DIVISOR_TX  102.5
+
+// WS2812 settings
+#ifdef STATUS_LED_USED
+#define NUM2812      4
+#define BRIGHTNESS  20
+#define LED_TX       0  // TX-Voltage
+#define LED_TRANS    1  // Transmission
+#define LED_VOLTAGE  2
+#define LED_FOUR     3
+#endif
+
+// Vibrator settings
+#define STRENGTH   255 // 0-255
+#define PULS       150 // ms
+
+//#define SEND_LR
+#define JOYSTICKBUTTON_DEADBAND   256
+
+// Drive train parameters
+#define DIA_WHEEL                  83 // mm
+#define RATIO_GEAR                3.2
+#define PULSE_REV                  42 //  Number of poles*3
+#define ERPM_REV                    7 //  Number of poles/2
+#define CORRECT_FACTOR_DISTANCE 0.825 // required out of practical tests
+#define AVERAGE_CYCLE             100
+
+struct calcValues {
+  int   numberCellsVesc = 0;
+  int   numberCellsTx = 0;
+  int   VescPersCap = 0;
+  int   TxPersCap = 0;
+  float speed = 0;
+  float maxSpeed = 0;
+  float distanceTravel = 0;
+  float rpmAverage = 0;
+  float currentAverage = 0;
+  float maxCurrent = 0;
+};
+
+
 //Settings for Nunchuk control
 #define SET_NUNCHUK_CONTROL
 
