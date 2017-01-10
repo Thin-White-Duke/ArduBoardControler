@@ -5,7 +5,7 @@
  * Author: AC
  */ 
 
- /*
+/*
  Copyright 2015 - 2017 Andreas Chaitidis Andreas.Chaitidis@gmail.com
 
  This program is free software : you can redistribute it and / or modify
@@ -20,157 +20,140 @@
 
  You should have received a copy of the GNU General Public License
  along with this program.If not, see <http://www.gnu.org/licenses/>.
-
  */
+
 #include <SPI.h>
 
 #include "Config.h"
 
-//Using the nRF34 library from https://github.com/TMRh20/RF24
-#include <nRF24L01.h>
+#include "nRF24L01.h" // nRF24 library from https://github.com/TMRh20/RF24
 #include "RF24.h"
-#include "printf.h"
-
-//Library for VESC UART
-#include "VescUart.h"
 #include "datatypes.h"
 #include "local_datatypes.h"
+#include "VescUart.h" //Library for VESC UART
 
-//Definition of radio class
+//#include "printf.h" not used, instead try
+//#define printf Serial.printf
 
+// Set up nRF24L01 radio on SPI bus plus pins NRF_CE & NRF_CS
 RF24 radio(NRF_CE,NRF_CS);
 
 //Define variables for remote
 struct remotePackage remPack;
-bool recOK = true;
-uint32_t lastTimeReceived = 0;
-
 struct bldcMeasure VescMeasuredValues;
 
-
+// Declaration of global variables and constants
+bool recOK = true;
+uint32_t lastTimeReceived = 0;
 int8_t persXJoy = 0;
 
-void setup()
-{
+void setup() {
 	
-	#ifdef DEBUG
-	  DEBUGSERIAL.begin(115200);
-	#endif
-	  //Initial for Radio
-	  SERIALIO.begin(115200);
-	  delay(1000);
+#ifdef DEBUG
+	DEBUGSERIAL.begin(115200);
+#endif
+	//Initial for Radio
+	SERIALIO.begin(115200);
+	delay(1000);
 #ifdef DEBUG 
-	  DEBUGSERIAL.println("Nrf24L01 Receiver Starting");
-#endif // DEBUG 
+	 DEBUGSERIAL.println("Nrf24L01 Receiver Starting");
+#endif
 
-	  radio.begin();
-	  radio.enableAckPayload();
-	  radio.enableDynamicPayloads();
-	  radio.openReadingPipe(1,pipe);
-
-	  radio.startListening();
+	// Initialization of Radio
+	radio.begin();
+	radio.enableAckPayload();
+	radio.enableDynamicPayloads();
+	radio.openReadingPipe(1,pipe);
+	radio.startListening();
 	 
-
-	// For initial start 
-	
-		remPack.valXJoy			= 512; //middle Position
-		remPack.valYJoy			= 512;
-		remPack.valLowerButton	= 0;
-		remPack.valLowerButton	= 0;
-}
+	// For initial start
+	remPack.valXJoy			    = 512; //todo: neutral position 128??
+	remPack.valYJoy			    = 512; //todo: neutral position 128??
+	remPack.valLowerButton	= 0;
+	remPack.valUpperButton	= 0;
+} //setup()
 
 void loop()
 {
 	//Getting Values from Vesc over UART
 
 	if (VescUartGetValue(VescMeasuredValues)) {
-	//	SerialPrint(VescMeasuredValues);
+#ifdef DEBUG
+    DEBUGSERIAL.println("RX: Got values from VESC over UART");
+    SerialPrint(VescMeasuredValues);
+#endif
 	}
-	else
-	{
+	else {
 #ifdef DEBUG
 		DEBUGSERIAL.println("Failed to get data from UART!");
-#endif // DEBUG
-
+#endif
 	}
 
-	//writing package to TX in AckPayload
-	//data will be send with next acknowledgement to TX
-
+	// RX: writing payload to TX via AckPayload with next acknowledgement
 	radio.writeAckPayload(pipe, &VescMeasuredValues, sizeof(VescMeasuredValues));
 	
 	//Get data from TX	
-	while (radio.available())
-	{
+	while (radio.available()) {
 		radio.read(&remPack, sizeof(remPack));
 		recOK = true;
 	}
 	
-
 	uint32_t now = millis();
 
-	if (recOK == true)
-	{
+	if (recOK == true) {
 		lastTimeReceived = millis();
-		
 #ifdef DEBUG
 		DEBUGSERIAL.println("Received TX successfully!");
-		
 #endif
 		recOK = false;
 	}
 	//Check if package were received within timeout
 	else if ((now - lastTimeReceived) > TIMEOUTMAX)
 		{
-			remPack.valXJoy = 128; //middle Position
-			remPack.valYJoy = 128;
-			remPack.valUpperButton = false;
+			remPack.valXJoy = 128; //todo: neutral position 512??
+			remPack.valYJoy = 128; //todo: neutral position 512??
 			remPack.valLowerButton = false;
+			remPack.valUpperButton = false;
 #ifdef DEBUG
-			DEBUGSERIAL.println("TX-signal lost!!");
+			DEBUGSERIAL.println("Timeout: TX-signal lost!");
 #endif
 		}
 
 #ifdef DEBUG
-
 	DEBUGSERIAL.println("Received package / Package in main loop: ");
-	DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy); DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
-	DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton); DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
+	DEBUGSERIAL.print("valXJoy = "); DEBUGSERIAL.print(remPack.valXJoy);
+	DEBUGSERIAL.print(" valYJoy = "); DEBUGSERIAL.println(remPack.valYJoy);
+	DEBUGSERIAL.print("LowerButton = "); DEBUGSERIAL.print(remPack.valLowerButton);
+	DEBUGSERIAL.print(" UpperButton = "); DEBUGSERIAL.println(remPack.valUpperButton);
 	DEBUGSERIAL.print("Calcx: "); DEBUGSERIAL.println(((float)persXJoy / 100) * 40.0);
-
 #endif
 
 // Nunchuck mode
-
 #ifdef SET_NUNCHUK_CONTROL
 	VescUartSetNunchukValues(remPack);
 #endif
 
+	// Current control
 #ifdef SET_CURRENT_CONTROL
-	//ToDo: was only used for initial tests. Never realy tested while driving!! Needs to be checked if it should be used
-	//Read the remote controls and control Vesc
-//Read the x-joystick and controls motor current and break
+	// ToDo: !! Decision for Nunchuk or current control should be done according BLDC tool
+	// ToDo: !! Through testing must be done before use while driving
 
-//transform values read to int
-
+	// Map Joystick Values to int8_t [A]
+	// ToDo: max. current must be taken von the BLDC settings
 	persXJoy = map(remPack.valXJoy, 0, 255, -100, 100);
 
-	if (persXJoy > DEADBAND_POS)
-	{
+	if (persXJoy > DEADBAND_POS) {
 		VescUartSetCurrent(((float)persXJoy / 100) * 40.0);
 #ifdef DEBUG
 		DEBUGSERIAL.println("Throttle");
 #endif // DEBUG
-
 	}
-	else if (persXJoy < DEADBAND_NEG)
-	{
+	else if (persXJoy < DEADBAND_NEG) {
 		VescUartSetCurrentBrake(((float)persXJoy / 100) * -3.0);
 #ifdef DEBUG
 		DEBUGSERIAL.println("Break");
 #endif
 	}
-
 	else
 	{
 		VescUartSetCurrent(0.0);
@@ -178,10 +161,6 @@ void loop()
 	}
 #endif // SET_CURRENT_CONTROL
 
-
-					
-
-	
 	//delay(1000);
 	
-}
+} // loop()

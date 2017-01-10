@@ -1,13 +1,13 @@
 #ifndef LOCAL_DATATYPES_H_
 #define LOCAL_DATATYPES_H_
 
-// Added by AC to store measured values
+// Values measured by the VESC@RX
 struct bldcMeasure {
-	//7 Values int16_t not read(14 byte)
+	//7 Values int16_t not read (14 byte)
 	float avgMotorCurrent;
 	float avgInputCurrent;
 	float dutyCycleNow;
-	long rpm;
+	long  rpm;
 	float inpVoltage;
 	float ampHours;
 	float ampHoursCharged;
@@ -16,15 +16,12 @@ struct bldcMeasure {
 	long tachometerAbs;
 };
 
-//Define remote Package
-
+// TX driver command values
 struct remotePackage {
-
 	int		valXJoy;
 	int		valYJoy;
 	boolean	valUpperButton;
 	boolean	valLowerButton;
-
 };
 
-#endif
+#endif // LOCAL_DATATYPES_H_

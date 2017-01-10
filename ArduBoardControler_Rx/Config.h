@@ -28,7 +28,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 	#include "WProgram.h"
 #endif
 
-//#define DEBUG
+#define DEBUG
 
 // Definition of Pipe
 const uint64_t pipe = 0xE8E8F0F0E1LL;
@@ -173,13 +173,5 @@ struct calcValues {
 
 //Settings for remote
 #define TIMEOUTMAX	500
-
-////Define remote Package
-//struct remotePackage {
-//	int		valXJoy;
-//	int		valYJoy;
-//	boolean	valUpperButton;
-//	boolean	valLowerButton;
-//} ; >> moved to datatypes.h in lib VescUartControl
 
 #endif // _CONFIG_h
